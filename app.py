@@ -1,12 +1,36 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
-from models import Pessoas, Atividades
+from models import Pessoas, Atividades, Usuarios
+from flask_httpauth import HTTPBasicAuth 
 
+auth = HTTPBasicAuth()
 app = Flask(__name__)
 api = Api(app)
 
+""" USUARIOS = {
+    'viny':'123',
+    'meireles':'321'
+} """
+
+""" --------------#método para verificação de login e senha sem banco de dados
+@auth.verify_password
+def verificacao(login, senha):
+    print(USUARIOS.get(login) == senha)
+    if not (login, senha):
+        return False
+    return USUARIOS.get(login) == senha """
+
+#------------------método para verificação de login e senha com banco de dados de usuarios
+@auth.verify_password
+def verificacao(login, senha):
+    if not (login, senha):
+        return False
+    return Usuarios.query.filter_by(login=login, senha=senha).first()    
+
+
 #api rest da classe Pessoas
 class Pessoa(Resource):
+    @auth.login_required
     def get(self, nome):
         pessoa = Pessoas.query.filter_by(nome=nome).first()
         try:
@@ -44,6 +68,7 @@ class Pessoa(Resource):
         return {'status': 'sucesso', 'mensagem': mensagem}
 
 class listaPessoas(Resource):
+    @auth.login_required
     def get(self):
         pessoas = Pessoas.query.all()
         response = [{'id':i.id, 'nome':i.nome, 'idade':i.idade} for i in pessoas]

@@ -16,3 +16,4 @@ six==1.16.0
 SQLAlchemy==1.4.31
 urllib3==1.26.8
 Werkzeug==2.0.2
+flask-httpauth==4.5.0
